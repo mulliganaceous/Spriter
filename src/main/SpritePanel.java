@@ -77,7 +77,11 @@ public class SpritePanel extends JPanel implements MouseInputListener {
 				// Draw relevant color
 				if (sprite.getPixelValue(y, x) == 0xF) {
 					g.setColor(Color.WHITE);
-					g.fillOval(drawTile*x, drawTile*y, drawTile, drawTile);
+					// Draw ovals for the F color (if pixel is large enough)
+					if (this.drawTile > 4)
+						g.fillOval(drawTile*x, drawTile*y, drawTile, drawTile);
+					else
+						g.fillRect(drawTile*x, drawTile*y, drawTile, drawTile);
 				}
 				else if (sprite.getPixelValue(y, x) > 0) {
 					g.setColor(sprite.getPixelColor(y, x));

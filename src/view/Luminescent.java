@@ -25,4 +25,16 @@ public interface Luminescent {
 		else 
 			return Color.WHITE;
 	}
+
+	public static Color bgColor(Color fg) {
+		if (fg == null)
+			return Color.WHITE;
+		int r = fg.getRed();
+		int g = fg.getGreen();
+		int b = fg.getBlue();
+		if ((r+b+g)/3 > 0x20)
+			return Color.BLACK;
+		else 
+			return Color.WHITE;
+	}
 }

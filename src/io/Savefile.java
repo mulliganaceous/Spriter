@@ -1,10 +1,11 @@
 package io;
 
-import java.io.BufferedWriter;
-import java.io.File;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 
+import model.SpriteModel;
 import sprite.Spec;
 import sprite.Sprite;
 
@@ -55,15 +56,26 @@ public class Savefile {
 		System.out.println();
 	}
 	
-	public boolean save(String path) {
-		File file = new File(path + Spec.FILE_EXT);
+	/**Perform save and update the model and filename.
+	 * @param model The model being updated.
+	 * @param filename The target filename.
+	 * @return If the save is successful.
+	 */
+	public boolean save(SpriteModel model, String filename) {
 		try {
-			PrintWriter pw = new PrintWriter(file);
-			BufferedWriter bw = new BufferedWriter(pw);
-			bw.write(sb.toString());
-			System.out.printf("Saved sprite to %s\n", path + Spec.FILE_EXT);
-			bw.close();
-			pw.close();
+			OutputStream fos = new FileOutputStream(filename + Spec.FILE_EXT);
+			BufferedOutputStream bos = new BufferedOutputStream(fos);
+			for (int k = 0; k < sb.length(); k++) {
+				bos.write(sb.codePointAt(k));
+				System.out.printf("%02X ", sb.codePointAt(k));
+				if (k % 16 == 15)
+					System.out.println();
+			}
+			System.out.printf("Saved sprite to %s\n", filename + Spec.FILE_EXT);
+			model.setFilename(filename + Spec.FILE_EXT);
+			model.update();
+			bos.close();
+			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;

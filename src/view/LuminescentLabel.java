@@ -15,4 +15,11 @@ public class LuminescentLabel extends JLabel {
 		this.setForeground(Color.WHITE);
 		this.setPreferredSize(new Dimension(256, 32));
 	}
+	
+	public LuminescentLabel(String text, int alignment) {
+		super(text, alignment);
+		this.setFont(new Font("Century Gothic", Font.BOLD, 16));
+		this.setForeground(Color.WHITE);
+		this.setPreferredSize(new Dimension(256, 32));
+	}
 }

@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import model.SpriteModel;
+import sprite.Spec;
 import sprite.Sprite;
 
 public class Loadfile {
 	private String path;
-	public Loadfile(String path) {
-		this.path = path;
+	public Loadfile(String filename) {
+		this.path = filename + Spec.FILE_EXT;
 	}
 	
 	private Sprite convertToSprite() throws SpriteException, IOException {
@@ -39,7 +40,7 @@ public class Loadfile {
 				red = bis.read();
 				green = bis.read();
 				blue = bis.read();
-				// System.out.printf("%02X %02X %02X\n", red, green, blue);
+				System.out.printf("%02X %02X %02X\n", red, green, blue);
 				sprite.setPaletteColor(val, new Color(red, green, blue));
 				
 				val++;
@@ -76,11 +77,15 @@ public class Loadfile {
 			return sprite;
 	}
 	
+	/**Perform load given a path file.
+	 * @param model The model being affected.
+	 * @return The load being successful.
+	 */
 	public boolean load(SpriteModel model) {
 		try {
 			Sprite sprite = this.convertToSprite();
-			model.setSprite(sprite);
 			model.setFilename(this.path);
+			model.setSprite(sprite);
 		} catch (FileNotFoundException exc) {
 			System.err.printf("File %s cannot be found!\n", this.path);
 			return false;

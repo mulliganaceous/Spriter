@@ -18,4 +18,17 @@ public class LuminescentField extends JTextField implements Luminescent {
 		this.setBorder(BorderFactory.createLineBorder(GITD));
 		this.setPreferredSize(new Dimension(len*4,32));
 	}
+	
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		if (enabled) {
+			this.setBackground(GITD);
+			this.setBorder(BorderFactory.createLineBorder(GITD));
+		}
+		else {
+			this.setText("");
+			this.setBackground(Color.BLACK);
+			this.setBorder(BorderFactory.createDashedBorder(GITD2));
+		}
+	}
 }
