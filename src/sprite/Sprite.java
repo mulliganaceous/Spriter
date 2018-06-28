@@ -78,6 +78,8 @@ public class Sprite {
 	 */
 	public void setPaletteColor(int value, Color color) {
 		this.palette[value] = color;
+		System.out.printf("Color %d changing to (%d, %d, %d)\n", value, 
+				color.getRed(),color.getGreen(),color.getBlue());
 	}
 	
 	/**

@@ -9,4 +9,6 @@ public interface Spec {
 	int S = 8;
 	int L = 16;
 	int G = 32;
+	String FILE_FOLDER = "sprites/";
+	String FILE_EXT = ".spr";
 }

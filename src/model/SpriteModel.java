@@ -1,11 +1,15 @@
 package model;
 
+import main.ControlsPanel;
+import main.SpritePanel;
 import sprite.Spec;
 import sprite.Sprite;
 
 public class SpriteModel {
 	public Sprite sprite;
 	public String filename;
+	public SpritePanel view;
+	public ControlsPanel controls;
 	private static SpriteModel model;
 	
 	/**Singleton constructor for the SpriteModel.
@@ -18,10 +22,12 @@ public class SpriteModel {
 	}
 	
 	/**Set the current sprite that will be used and manipulated by the program.
+	 * This action also updates all the associated components.
 	 * @param sprite The new sprite
 	 */
 	public void setSprite(Sprite sprite) {
 		this.sprite = sprite;
+		this.update();
 	}
 	
 	/**Obtain the current sprite being used.
@@ -41,6 +47,29 @@ public class SpriteModel {
 	 */
 	public void removeFilename() {
 		this.filename = null;
+	}
+	
+	public void setView(SpritePanel view) {
+		this.view = view;
+	}
+	
+	public void setControls(ControlsPanel controls) {
+		this.controls = controls;
+	}
+	
+	/**Update all the associated components
+	 */
+	public void update() {
+		this.view.update();
+		this.controls.update();
+		// System.out.println("State updated");
+	}
+	
+	/**Update all the associated GUI appearances
+	 */
+	public void updateGUI() {
+		this.view.updateGUI();
+		this.controls.update();
 	}
 	
 	/**

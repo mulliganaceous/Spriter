@@ -26,6 +26,8 @@ public class MainGUI extends JFrame {
 		this.control = new ControlsPanel(model);
 		this.control.setAssociatedSpritePanel(this.panel);
 		this.getContentPane().add(control);
+		this.model.setView(panel);
+		this.model.setControls(control);
 		// Set up dimensions
 		this.setTitle("Spriter");
 		this.setSize(512, 768);

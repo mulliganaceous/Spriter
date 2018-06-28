@@ -8,7 +8,10 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
+import io.Loadfile;
+import io.Savefile;
 import model.SpriteModel;
+import sprite.Spec;
 import sprite.Sprite;
 import view.*;
 
@@ -25,6 +28,7 @@ public class ControlsPanel extends JPanel {
 	private LuminescentButton changeColorButton;
 	// New sprite button
 	private JButton newSpriteS, newSpriteL, newSpriteOth;
+	private OtherSpriteDialog dialog;
 	// Load and save
 	private LuminescentField fileField;
 	private LuminescentButton loadButton, loadPathButton, saveButton, gifButton;
@@ -42,7 +46,7 @@ public class ControlsPanel extends JPanel {
 		
 		// Add controls
 		// Palettes
-		JPanel topPanel = new JPanel();
+		JPanel topPanel = new LuminescentPanel();
 		topPanel.setPreferredSize(new Dimension(256, 192));
 		this.selectedValue = 1;
 		
@@ -78,12 +82,10 @@ public class ControlsPanel extends JPanel {
 		changeColorPanel.add(this.changeColorButton);
 		topPanel.add(changeColorPanel);
 		
-		topPanel.setBackground(Color.BLACK);
-		topPanel.setBorder(BorderFactory.createLineBorder(Luminescent.GITD,2));
 		this.add(topPanel);
 		
 		// File Panel
-		JPanel newFilePanel = new JPanel();
+		JPanel newFilePanel = new LuminescentPanel();
 		newFilePanel.setPreferredSize(new Dimension(256, 272));
 		
 		newFilePanel.add(new LuminescentLabel("New Sprite"));
@@ -95,6 +97,7 @@ public class ControlsPanel extends JPanel {
 		this.newSpriteL.addActionListener(new NewSpriteListener(16, 16));
 		this.newSpriteOth = new LuminescentButton("Others");
 		this.newSpriteOth.setPreferredSize(new Dimension(240, 32));
+		this.newSpriteOth.addActionListener(new OtherSpriteListener());
 		newFilePanel.add(newSpriteS);
 		newFilePanel.add(newSpriteL);
 		newFilePanel.add(newSpriteOth);
@@ -109,34 +112,38 @@ public class ControlsPanel extends JPanel {
 		this.saveButton.setPreferredSize(new Dimension(120, 32));
 		this.gifButton = new LuminescentButton("Save GIF");
 		this.gifButton.setPreferredSize(new Dimension(120, 32));
+		this.loadButton.addActionListener(new LoadFileListener());
+		this.saveButton.addActionListener(new SaveFileListener());
 		newFilePanel.add(fileField);
 		newFilePanel.add(loadButton);
 		newFilePanel.add(loadPathButton);
 		newFilePanel.add(saveButton);
 		newFilePanel.add(gifButton);
 		
-		newFilePanel.setBackground(Color.BLACK);
-		newFilePanel.setBorder(BorderFactory.createLineBorder(Luminescent.GITD,2));
 		this.add(newFilePanel);
 		
 		// Bottom Pannel
-		JPanel bottomPanel = new JPanel();
+		JPanel bottomPanel = new LuminescentPanel();
 		bottomPanel.setPreferredSize(new Dimension(256, 48));
+		bottomPanel.setLayout(null);
 		
 		this.minipanel = new SpritePanel(this.model, 2);
 		this.minipanel.setDrawBorders(false);
+		this.minipanel.setBounds(4, 4, 32, 32);
 		bottomPanel.add(minipanel);
 		
 		this.fileLabel = new LuminescentLabel("");
-		fileLabel.setFont(Luminescent.TINY_FONT);
-		this.minipanel.setSize(255, 16);
-		this.minipanel.setBackground(Color.BLUE);
-		fileLabel.setText("File: " + this.model.getFilename());
+		this.fileLabel.setFont(Luminescent.TINY_FONT);
+		this.fileLabel.setSize(240, 16);
+		this.fileLabel.setBackground(Color.RED);
+		this.fileLabel.setText("File: " + this.model.getFilename());
+		this.fileLabel.setBounds(bottomPanel.getWidth()/2, 28, 240, 24);
 		bottomPanel.add(fileLabel);
 		
-		bottomPanel.setBackground(Color.BLACK);
-		bottomPanel.setBorder(BorderFactory.createLineBorder(Luminescent.GITD,2));
 		this.add(bottomPanel);
+		
+		// Dialogs
+		this.dialog = new OtherSpriteDialog(ControlsPanel.this);
 	}
 	
 	public int getSelectedValue() {
@@ -157,14 +164,13 @@ public class ControlsPanel extends JPanel {
 	 * @param val The color value index to be modified
 	 * @param color The new color
 	 */
-	private void changeColor(int val, Color color) {;
+	private void changeColor(Color color) {;
 		Sprite sprite = ControlsPanel.this.model.getSprite();
-		int selectedValue = ControlsPanel.this.selectedValue;
-		
-		sprite.setPaletteColor(selectedValue, color);
-		ControlsPanel.this.update();
-		System.out.printf("Color %d changing to (%d, %d, %d)\n", selectedValue, 
-				color.getRed(),color.getGreen(),color.getBlue());
+		if (this.selectedValue > 0 && this.selectedValue < 0xF)
+			sprite.setPaletteColor(this.selectedValue, color);
+		else
+			System.out.printf("Color %d cannot be changed.", this.selectedValue);
+		this.model.update();
 	}
 	
 	/**Edit a new sprite
@@ -174,7 +180,9 @@ public class ControlsPanel extends JPanel {
 	public void newSprite(int h, int w) {
 		this.model.removeFilename();
 		this.model.setSprite(new Sprite(h, w));
-		this.update();
+		this.dialog.setVisible(false);
+		this.model.update();
+		System.gc(); // Garbage collect here
 		System.out.printf("New %d×%d sprite created.\n", h, w);
 	}
 	
@@ -186,9 +194,10 @@ public class ControlsPanel extends JPanel {
 			this.paletteButton[k].updateColor();
 		}
 		this.minipanel.update();
+		this.fileLabel.setText("File: " + this.model.getFilename());
 	}
 	
-	/**
+	/**Action listener to select color
 	 * @author !MULLIGANACEOUS!
 	 */
 	private class ColorButtonListener implements ActionListener {
@@ -203,20 +212,18 @@ public class ControlsPanel extends JPanel {
 		}
 	}
 	
-	/**
+	/**Action listener to change a color on the palette
 	 * @author !MULLIGANACEOUS!
 	 */
 	private class ColorChangeListener implements ActionListener {
-		
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			try {
 				int r = ControlsPanel.this.rField.getHexValue();
 				int g = ControlsPanel.this.gField.getHexValue();
 				int b = ControlsPanel.this.bField.getHexValue();
-				int selectedValue = ControlsPanel.this.selectedValue;
 				Color color = new Color(r,g,b);
-				ControlsPanel.this.changeColor(selectedValue, color);
+				ControlsPanel.this.changeColor(color);
 			} catch (NumberFormatException exc) {
 				System.out.println("Not a hex value");
 				return;
@@ -226,7 +233,7 @@ public class ControlsPanel extends JPanel {
 		}
 	}
 	
-	/**
+	/**Action listener to generate new sprite.
 	 * @author !MULLIGANACEOUS!
 	 */
 	private class NewSpriteListener implements ActionListener {
@@ -240,6 +247,62 @@ public class ControlsPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			ControlsPanel.this.newSprite(h,w);
+		}
+	}
+	
+	/**Action listener to generate new custom sprite.
+	 * @author !MULLIGANACEOUS!
+	 */
+	private class OtherSpriteListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			dialog.setVisible(true);
+		}
+	}
+
+	/**Action listener to load file
+	 * @author !MULLIGANACEOUS!
+	 */
+	public class LoadFileListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String filename = ControlsPanel.this.fileField.getText();
+			String curPath = ControlsPanel.this.model.getFilename();
+			Loadfile ldf;
+			if (!filename.equals("")) {
+				ldf = new Loadfile(Spec.FILE_FOLDER + filename + Spec.FILE_EXT);
+				ldf.load(ControlsPanel.this.model);
+			}
+			else if (curPath != null) {
+				ldf = new Loadfile(Spec.FILE_FOLDER + curPath + Spec.FILE_EXT);
+				ldf.load(ControlsPanel.this.model);
+			}
+			else
+				System.err.println("Cannot load nameless sprite.");
+		}
+	}
+
+	
+	/**Action listener to save file
+	 * @author !MULLIGANACEOUS!
+	 */
+	private class SaveFileListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			Savefile spr = new Savefile(ControlsPanel.this.model.getSprite());
+			spr.outputToScreen();
+			String path = ControlsPanel.this.fileField.getText();
+			String curPath = ControlsPanel.this.model.getFilename();
+			if (!path.equals("")) {
+				spr.save(Spec.FILE_FOLDER + path);
+				ControlsPanel.this.model.setFilename(path);
+			}
+			else if (curPath != null) {
+				spr.save(Spec.FILE_FOLDER + curPath);
+			}
+			else
+				System.err.println("Cannot save nameless sprite.");
+			ControlsPanel.this.model.update();
 		}
 	}
 }
