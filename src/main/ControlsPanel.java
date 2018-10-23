@@ -5,16 +5,22 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.*;
 
 import io.Loadfile;
 import io.Savefile;
+import io.SpriteException;
 import model.SpriteModel;
 import sprite.Spec;
 import sprite.Sprite;
 import view.*;
 
+/**Control Panel for the Spriter allowing you to set colors, load/save
+ * sprites, and borrow palettes from other sprites.
+ * @author !MULLIGANACEOUS!
+ */
 public class ControlsPanel extends JPanel {
 	private static final long serialVersionUID = 101;
 	// Link to model and associated panel
@@ -26,6 +32,8 @@ public class ControlsPanel extends JPanel {
 	private ColorButton[] paletteButton;
 	private ColorField rField, gField, bField;
 	private LuminescentButton changeColorButton;
+	private LuminescentField paletteFileField;
+	private LuminescentButton loadPaletteButton;
 	// New sprite button
 	private JButton newSpriteS, newSpriteL, newSpriteOth;
 	private OtherSpriteDialog dialog;
@@ -47,7 +55,7 @@ public class ControlsPanel extends JPanel {
 		// Add controls
 		// Palettes
 		JPanel topPanel = new LuminescentPanel();
-		topPanel.setPreferredSize(new Dimension(256, 192));
+		topPanel.setPreferredSize(new Dimension(256, 200));
 		this.selectedValue = 1;
 		
 		topPanel.add(new LuminescentLabel("Palette selection"));
@@ -63,25 +71,40 @@ public class ControlsPanel extends JPanel {
 		}
 		this.paletteButton[0].fixPalette();
 		this.paletteButton[15].fixPalette();
+		
+		this.paletteFileField = new LuminescentField(10);
 
 		topPanel.add(palettePanel);
 		
 		// Change Color
 		JPanel changeColorPanel = new JPanel();
+		changeColorPanel.setLayout(new GridLayout(2,1,0,0));
 		changeColorPanel.setBackground(null);
+		JPanel rgbPanel = new JPanel();
+		rgbPanel.setBackground(null);
 		this.rField = new ColorField();
 		this.gField = new ColorField();
 		this.bField = new ColorField();
 		this.changeColorButton = new LuminescentButton("Modify Color");
 		this.changeColorButton.setPreferredSize(new Dimension(112, 32));
 		this.changeColorButton.addActionListener(new ColorChangeListener());
-		changeColorPanel.add(this.rField);
-		changeColorPanel.add(this.gField);
-		changeColorPanel.add(this.bField);
-		changeColorPanel.add(this.changeColorButton);
-		this.updateRGBFields();
-		topPanel.add(changeColorPanel);
+		rgbPanel.add(this.rField);
+		rgbPanel.add(this.gField);
+		rgbPanel.add(this.bField);
+		rgbPanel.add(this.changeColorButton);
 		
+		this.loadPaletteButton = new LuminescentButton("Import");
+		this.loadPaletteButton.setPreferredSize(new Dimension(64, 32));
+		this.loadPaletteButton.addActionListener(new ImportPaletteListener());
+		this.updateRGBFields();
+		
+		JPanel importColorPanel = new JPanel();
+		importColorPanel.setBackground(null);
+		importColorPanel.add(paletteFileField);
+		importColorPanel.add(loadPaletteButton);
+		changeColorPanel.add(rgbPanel);
+		changeColorPanel.add(importColorPanel);
+		topPanel.add(changeColorPanel);
 		this.add(topPanel);
 		
 		// File Panel
@@ -254,6 +277,31 @@ public class ControlsPanel extends JPanel {
 			} catch (IllegalArgumentException exc) {
 				System.out.println("Color value out of range");
 			}
+		}
+	}
+	
+	/**Action listener to borrow the palette of the sprite from
+	 * the palette of the terget sprite.
+	 * @author !MULLIGANACEOUS!
+	 */
+	private class ImportPaletteListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String filename = ControlsPanel.this.paletteFileField.getText();
+			Loadfile ldf;
+			if (!filename.equals("")) {
+				ldf = new Loadfile(Spec.FILE_FOLDER + filename);
+				try {
+					Sprite ps = ldf.convertToSprite();
+					ControlsPanel.this.model.getSprite().setPalette(ps.getPalette());
+					ControlsPanel.this.update();
+					System.out.println("Imported palette from " + ldf.toString());
+				} catch (SpriteException | IOException e) {
+					System.err.println("Sprite error occurred while importing paleette.");
+				}
+			}
+			else
+				System.err.println("Cannot load nameless sprite.");
 		}
 	}
 	

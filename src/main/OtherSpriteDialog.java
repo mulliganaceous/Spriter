@@ -12,6 +12,9 @@ import sprite.IncorrectSizeException;
 import sprite.Spec;
 import view.*;
 
+/**A Dialog which specifies you to create a custom-size sprite.
+ * @author !MULLIGANACEOUS!
+ */
 public class OtherSpriteDialog extends JDialog {
 	private static final long serialVersionUID = 153;
 	private ControlsPanel controls;

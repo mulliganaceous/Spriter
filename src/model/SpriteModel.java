@@ -6,10 +6,10 @@ import sprite.Spec;
 import sprite.Sprite;
 
 public class SpriteModel {
-	public Sprite sprite;
-	public String filename;
-	public SpritePanel view;
-	public ControlsPanel controls;
+	private Sprite sprite;
+	private String filename;
+	private SpritePanel view;
+	private ControlsPanel controls;
 	private static SpriteModel model;
 	
 	/**Singleton constructor for the SpriteModel.

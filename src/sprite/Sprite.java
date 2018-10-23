@@ -72,6 +72,14 @@ public class Sprite {
 		return this.palette[this.spritesheet[h][w]];
 	}
 	
+	/**Change the palette of that sprite. Note the palette must have 16 colors.
+	 * @param palette The new palette.
+	 */
+	public void setPalette(Color[] palette) {
+		if (palette != null && palette.length == 16)
+			this.palette = palette;
+	}
+	
 	/**Change the palette color of that palette.
 	 * @param value The color value (must be 1 to 15)
 	 * @param color The new color

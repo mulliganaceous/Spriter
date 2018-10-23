@@ -17,7 +17,12 @@ public class Loadfile {
 		this.path = filename + Spec.FILE_EXT;
 	}
 	
-	private Sprite convertToSprite() throws SpriteException, IOException {
+	/**Use the binary data from the loadfile to convert it into a Sprite.
+	 * @return The converted sprite.
+	 * @throws SpriteException
+	 * @throws IOException
+	 */
+	public Sprite convertToSprite() throws SpriteException, IOException {
 		Sprite sprite = null;
 			InputStream f = new FileInputStream(this.path);
 			BufferedInputStream bis = new BufferedInputStream(f);
